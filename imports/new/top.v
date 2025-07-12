@@ -148,16 +148,19 @@ module Top(
 	//U3
 		assign Addr_in = Addr_out;
 	assign Data_read_from_dm = Cpu_data4bus;
+    // assign Data_read_from_dm=douta;
 	assign Data_write = ram_data_in;
+    // assign Data_write=Data_out;
 	
 	//U3_RAM_B
 	assign addra = ram_addr;
+    // assign addra=Addr_out[11:2];
 	assign ram_data_out = douta;
 	assign dina= Data_write_to_dm;
 	assign wea = wea_mem;
 	
 	//U4_MIO_BUS
-	  assign PC = PC_out;//猜的
+	  assign PC = PC_out;
 	assign BTN = BTN_out;
 	assign SW_U4= SW_out;
 	assign addr_bus = Addr_out;
@@ -239,6 +242,7 @@ assign Cpu_data2bus = Data_out;
     .Data_write(Data_write),
     .dm_ctrl(dm_ctrl),
     .Data_read_from_dm(Data_read_from_dm),
+    
     .Data_read(Data_read),
     .Data_write_to_dm(Data_write_to_dm),
     .wea_mem(wea_mem)

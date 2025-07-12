@@ -9,7 +9,9 @@ module dm(clk, DMWr, addr, din, dout);
      
    reg [31:0] dmem[127:0];
    
-   always @(posedge clk)
+   // always @(posedge clk)
+   //modify
+   always@(negedge clk)
       if (DMWr) begin
          dmem[addr[8:2]] <= din;
         $display("dmem[0x%8X] = 0x%8X,", addr << 2, din); 

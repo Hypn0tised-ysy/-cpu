@@ -29,7 +29,7 @@ module sccomp_tb();
     #(50) clk = ~clk;
 	   
     if (clk == 1'b1) begin
-      if ((counter == 1000) || (U_SCCOMP.U_SCPU.PC_out=== 32'hxxxxxxxx)) begin
+      if (U_SCCOMP.U_SCPU.PC_out=== 32'hxxxxxxxx) begin
         $fclose(foutput);
         $stop;
       end

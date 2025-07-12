@@ -1,16 +1,15 @@
 // `include "ctrl_encode_def.v"
 
 //123
-module ctrl(Op, Funct7, Funct3, Zero, 
+module ctrl(Op, Funct7, Funct3, 
             RegWrite, MemWrite,
             EXTOp, ALUOp, NPCOp, 
-            ALUSrc, GPRSel, WDSel,DMType
+            ALUSrc, GPRSel, WDSel,DMType,MemRead
             );
             
    input  [6:0] Op;       // opcode
    input  [6:0] Funct7;    // funct7
    input  [2:0] Funct3;    // funct3
-   input        Zero;
    
    output       RegWrite; // control signal for register write
    output       MemWrite; // control signal for memory write
@@ -21,7 +20,9 @@ module ctrl(Op, Funct7, Funct3, Zero,
 	output [2:0] DMType;
    output [1:0] GPRSel;   // general purpose register selection
    output [1:0] WDSel;    // (register) write data selection
-   
+
+   output MemRead;
+
   // r format
     wire rtype  = ~Op[6]&Op[5]&Op[4]&~Op[3]&~Op[2]&Op[1]&Op[0]; //0110011
     wire i_add  = rtype& ~Funct7[6]&~Funct7[5]&~Funct7[4]&~Funct7[3]&~Funct7[2]&~Funct7[1]&~Funct7[0]&~Funct3[2]&~Funct3[1]&~Funct3[0]; // add 0000000 000
@@ -113,7 +114,7 @@ module ctrl(Op, Funct7, Funct3, Zero,
   // NPC_BRANCH  3'b001
   // NPC_JUMP    3'b010
   // NPC_JALR	3'b100
-  assign NPCOp[0] = sbtype & Zero;
+  assign NPCOp[0] = sbtype ;
   assign NPCOp[1] = i_jal;
 	assign NPCOp[2]=i_jalr;
   
@@ -130,4 +131,6 @@ module ctrl(Op, Funct7, Funct3, Zero,
 assign DMType[2] = i_lbu;
   assign DMType[1] = i_lb | i_sb | i_lhu;
   assign DMType[0] = i_lh | i_sh | i_lb | i_sb;
+
+assign MemRead=itype_l;//?only load instructions need to read memory?
 endmodule

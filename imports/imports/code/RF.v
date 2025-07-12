@@ -10,7 +10,9 @@
 
   integer i;
 
-  always @(posedge clk, posedge rst)
+  // always @(posedge clk, posedge rst)
+  //modify
+  always@(negedge clk or posedge rst)
     if (rst) begin    //  reset
       for (i=1; i<32; i=i+1)
         rf[i] <= 0; //  i;

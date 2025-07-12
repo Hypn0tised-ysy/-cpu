@@ -1,5 +1,5 @@
-module PC( clk, rst, NPC, PC );
-
+module PC(PCWrite, clk, rst, NPC, PC );
+  input PCWrite;
   input              clk;
   input              rst;
   input       [31:0] NPC;
@@ -9,7 +9,7 @@ module PC( clk, rst, NPC, PC );
     if (rst) 
       PC <= 32'h0000_0000;
 //      PC <= 32'h0000_3000;
-    else
+    else if(PCWrite)
       PC <= NPC;
       
 endmodule
