@@ -1,10 +1,10 @@
 -- Copyright 1986-2018 Xilinx, Inc. All Rights Reserved.
 -- --------------------------------------------------------------------------------
 -- Tool Version: Vivado v.2018.3 (win64) Build 2405991 Thu Dec  6 23:38:27 MST 2018
--- Date        : Wed Jul  2 12:17:16 2025
+-- Date        : Tue Jul 15 12:09:07 2025
 -- Host        : ysy running 64-bit major release  (build 9200)
--- Command     : write_vhdl -force -mode synth_stub -rename_top ROM -prefix
---               ROM_ ROM_stub.vhdl
+-- Command     : write_vhdl -force -mode synth_stub
+--               D:/14814/codes/verilog/interrupt/origin_SOC.srcs/sources_1/ip/ROM/ROM_stub.vhdl
 -- Design      : ROM
 -- Purpose     : Stub declaration of top-level module interface
 -- Device      : xc7a100tcsg324-1

@@ -15,7 +15,7 @@
 // Please paste the declaration into a Verilog source file or add the file as an additional source.
 `include "../code/ctrl_encode_def.v"
 module SCPU(clk, reset, MIO_ready, inst_in, Data_in, mem_w, 
-  PC_out, Addr_out, Data_out, dm_ctrl, CPU_MIO, INT);
+  PC_out, Addr_out, Data_out, dm_ctrl, CPU_MIO, INT,SEPC_out,SCAUSE_out);
   input clk;
   input reset;
   input MIO_ready;
@@ -31,8 +31,11 @@ module SCPU(clk, reset, MIO_ready, inst_in, Data_in, mem_w,
   output [31:0]Data_out;
   output [2:0]dm_ctrl;
 
+  output [31:0] SEPC_out;
+  output [7:0] SCAUSE_out;
+
   output CPU_MIO;
-  input INT;
+  input INT;//作为外部中断信号，开�?14置位则进入循环，14复位则恢复到原指令执�?
       wire        RegWrite;    // control signal to register write
     wire [5:0]       EXTOp;       // control signal to signed extension
     wire [4:0]  ALUOp;       // ALU opertion
@@ -149,12 +152,49 @@ wire stall_signal;
 
 wire [31:0]RD2_forwarded;
 
+wire [7:0]EX_SCAUSE;
+
+wire int_signal;
+
+wire overflow;
+wire ERET;
+wire ERETN;
+
+reg [31:0] SEPC;
+reg [7:0] SCAUSE;
+reg [7:0] INTMASK=8'hff;
+
+always @(negedge clk or posedge reset) begin
+    if (reset) begin
+        SEPC <= 32'h00000000;
+        SCAUSE <= 8'h00;
+        INTMASK <= 8'hff;
+    end
+    else 
+
+    begin
+      SEPC<=
+    int_signal?(EX_pcplus4-4):SEPC;
+    SCAUSE<=
+    int_signal?EX_SCAUSE:SCAUSE;
+    end
+
+end
+
+assign ERET=(EX_instruction==32'h01111111);
+assign ERETN=(EX_instruction==32'h11111111);
+assign int_signal=(EX_SCAUSE!=8'h00);
+
+assign EX_SCAUSE=
+overflow?8'h01:
+(EX_instruction==32'h0011_1111)?8'h03://syscall
+(EX_instruction==32'h1111_0000)?8'h04://undefined instruction
+8'h00;
 
 
 
-
-
-
+assign SEPC_out=SEPC;
+assign SCAUSE_out=SCAUSE;
 
 assign RD2_forwarded=
 (ForwardSignalB==2'b00)?EX_RD2:
@@ -251,7 +291,7 @@ assign A=
   );
 
 // instantiation of alu unit
-	alu U_alu(.A(A), .B(B), .ALUOp(EX_ALUOp), .C(aluout), .Zero(Zero), .PC(EX_pcplus4-4));
+	alu U_alu(.A(A), .B(B), .ALUOp(EX_ALUOp), .C(aluout), .Zero(Zero), .PC(EX_pcplus4-4),.overflow(overflow));
 
 //please connnect the CPU by yourself
 
@@ -319,14 +359,14 @@ assign A=
 
 assign PCWrite=~stall_signal;
 
-assign IF_ID_flush=Branch_or_Jump;
+assign IF_ID_flush=Branch_or_Jump|int_signal|ERET|ERETN;
 assign IF_ID.write_enable=~(stall_signal);
 
-assign ID_EX_flush=Branch_or_Jump|stall_signal;
+assign ID_EX_flush=Branch_or_Jump|stall_signal|int_signal|ERET|ERETN;
 assign ID_EX_write_enable=1'b1;
 
 assign EX_MEM_flush=1'b0;
-assign EX_MEM_write_enable=1'b1;
+assign EX_MEM_write_enable=~int_signal|ERET|ERETN;
 
 assign MEM_WB_flush=1'b0;
 assign MEM_WB_write_enable=1'b1;
@@ -390,6 +430,8 @@ assign ID_EX_in[299]=ID_MemRead;
 assign ID_EX_in[288:284]=ID_rs1;
 assign ID_EX_in[293:289]=ID_rs2;
 assign ID_EX_in[298:294]=ID_rd; 
+
+assign ID_EX_in[31:0]=IF_ID_out[31:0];
 
 //
 
@@ -523,7 +565,7 @@ ForwardingUnit forwardB(
 );
 
  // instantiation of pc unit
-	PC U_PC(.PCWrite(PCWrite),.clk(clk), .rst(reset), .NPC(NPC), .PC(PC_out) );//to do
+	PC U_PC(.PCWrite(PCWrite),.clk(clk), .rst(reset), .NPC(NPC), .PC(PC_out),.SEPC(SEPC),.int_signal(int_signal),.ERET(ERET),.ERETN(ERETN) );//to do
 	NPC U_NPC(.EX_PC(EX_pcplus4-4),.PC(PC_out), .NPCOp(EX_NPCOp), .IMM(EX_immout), .NPC(NPC), .aluout(aluout));//to do
 	EXT U_EXT(
 		.iimm_shamt(iimm_shamt), .iimm(iimm), .simm(simm), .bimm(bimm),

@@ -13,7 +13,7 @@ module sccomp_tb();
   	integer counter = 0;
    
    initial begin
-      $readmemh( "testac.dat" , U_SCCOMP.U_IM.ROM); // load instructions into instruction memory
+      $readmemh( "app.dat" , U_SCCOMP.U_IM.ROM); // load instructions into instruction memory
        $readmemh( "ram.dat" , U_SCCOMP.U_DM.dmem); 
 //    $monitor("PC = 0x%8X, instr = 0x%8X", U_SCCOMP.PC, U_SCCOMP.instr); // used for debug
       foutput = $fopen("results.txt");
@@ -34,7 +34,7 @@ module sccomp_tb();
         $stop;
       end
       else begin
-        if (U_SCCOMP.PC == 32'h00000048) begin
+        begin
           counter = counter + 1;
           $fdisplay(foutput, "pc:\t %h", U_SCCOMP.PC);
           $fdisplay(foutput, "instr:\t\t %h", U_SCCOMP.instr);
@@ -47,14 +47,9 @@ module sccomp_tb();
           $fdisplay(foutput, "rf24-27:\t %h %h %h %h", U_SCCOMP.U_SCPU.U_RF.rf[24], U_SCCOMP.U_SCPU.U_RF.rf[25], U_SCCOMP.U_SCPU.U_RF.rf[26], U_SCCOMP.U_SCPU.U_RF.rf[27]);
           $fdisplay(foutput, "rf28-31:\t %h %h %h %h", U_SCCOMP.U_SCPU.U_RF.rf[28], U_SCCOMP.U_SCPU.U_RF.rf[29], U_SCCOMP.U_SCPU.U_RF.rf[30], U_SCCOMP.U_SCPU.U_RF.rf[31]);
           //$fdisplay(foutput, "hi lo:\t %h %h", U_SCCOMP.U_SCPU.U_RF.rf.hi, U_SCCOMP.U_SCPU.U_RF.rf.lo);
-          $fclose(foutput);
-          $stop;
+
         end
-        else begin
-          counter = counter + 1;
-//          $display("pc: %h", U_SCCOMP.U_SCPU.PC);
-//          $display("instr: %h", U_SCCOMP.U_SCPU.instr);
-        end
+
       end
     end
   end //end always

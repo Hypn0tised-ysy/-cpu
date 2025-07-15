@@ -104,6 +104,11 @@ module Top(
     wire [7:0]LES_U6;      
     wire [7:0]seg_an;  
     wire [7:0]seg_sout;
+
+    wire [31:0]SEPC_out;
+    wire [31:0]SCAUSE_out;
+
+    wire [7:0] seg_disp;
     
     //U7_SPIO
     wire EN_U7;
@@ -190,7 +195,10 @@ assign Cpu_data2bus = Data_out;
 	//U6
 	assign SW0 = SW_out[0];
 	assign flash = clkdiv[10];
-		assign Hexs = Disp_num;
+			//  assign Hexs = SW_out[11]?SEPC_out:
+            //        SW_out[10]?SCAUSE_out:
+            //         Disp_num;
+            assign Hexs=Disp_num;
     assign LES_U6 = LE_out;
     assign point = point_out;
 
@@ -213,7 +221,7 @@ assign Cpu_data2bus = Data_out;
 	assign SW_Enter = sw_i;
     
     assign disp_an_o = seg_an;
-    assign disp_seg_o = seg_sout;
+    assign disp_seg_o =seg_sout;
     assign led_o = led;
     
     SCPU U1_SCPU (
@@ -228,7 +236,9 @@ assign Cpu_data2bus = Data_out;
     .Data_out(Data_out),
     .dm_ctrl(dm_ctrl),
     .CPU_MIO(CPU_MIO),
-    .INT(INT)
+    .INT(INT),
+    .SEPC_out(SEPC_out),
+    .SCAUSE_out(SCAUSE_out)
     );
     
     ROM U2_ROM_D (
